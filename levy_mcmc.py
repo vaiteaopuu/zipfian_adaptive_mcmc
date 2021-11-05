@@ -70,11 +70,9 @@ def run_test(args):
         pr_val += [pearsonr(pred_prob, true_prob)[0]]
     return sc_val, mean(pr_val)
 
-    
-
 
 def main():
-    nb_el = 4
+    nb_el = 8
     # optim = True
     optim = False
 
@@ -112,8 +110,8 @@ def main():
         true_prob /= sum(true_prob)
 
         for i in range(nb_el):
-            print(pearsonr(pred_prob, true_prob))
             pred_prob = exp(histo[i, :])/sum(exp(histo[i, :]))
+            print(pearsonr(pred_prob, true_prob))
             dens_f[i].plot(x_dist, pred_prob)
             dens_f[i].set_ylabel("density")
             dens_f[i].set_xlim([-20, 20])
