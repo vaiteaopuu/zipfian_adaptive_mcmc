@@ -6,13 +6,13 @@ from multiprocessing import Pool
 from matplotlib import pyplot as plt
 
 
-H_STEP = 0.0005
-DELTAT = 200.0
+H_STEP = 0.001
+DELTAT = 50.0
 
 
 def update_bias(histo, dist, x_dist, nb_el):
     for i in range(nb_el):
-        histo[i, :] += H_STEP * exp(-(x_dist - dist[i])**2/0.005) * exp(-histo[i, :]/DELTAT)
+        histo[i, :] += H_STEP * exp(-(x_dist - dist[i])**2/1.0) * exp(-histo[i, :]/DELTAT)
     return histo
 
 
@@ -36,7 +36,8 @@ def mcmc(nb_steps, nb_el, mut_prob):
         new_conf = old_conf + mut_prob(nb_el)
         new_prob = prob_func(new_conf)
         dist_n = [argmin((x_dist - el)**2) for el in new_conf]
-        new_b_prob = prob_func(array([histo[si, i] for si, i in enumerate(dist_n)]))
+        # new_b_prob = prob_func(array([histo[si, i] for si, i in enumerate(dist_n)]))
+        new_b_prob = exp(sum(histo[si, i] for si, i in enumerate(dist_n)))
 
         # if new_prob > old_prob or new_prob/old_prob >= uniform(0, 1):
         if new_prob * old_b_prob > old_prob * new_b_prob or (new_prob * old_b_prob)/(old_prob * new_b_prob) >= uniform(0, 1):
@@ -45,10 +46,11 @@ def mcmc(nb_steps, nb_el, mut_prob):
             acc += 1
         traj += [old_conf]
 
-        # if step % 10 == 0:
+        # IF step % 10 == 0:
         update_bias(histo, old_conf, x_dist, nb_el)
         dist_o = [argmin((x_dist - el)**2) for el in old_conf]
-        old_b_prob = prob_func(array([histo[si, i] for si, i in enumerate(dist_o)]))
+        # old_b_prob = prob_func(array([histo[si, i] for si, i in enumerate(dist_o)]))
+        old_b_prob = exp(sum(histo[si, i] for si, i in enumerate(dist_o)))
     return array(traj), histo, x_dist
 
 
@@ -72,7 +74,7 @@ def run_test(args):
 
 
 def main():
-    nb_el = 8
+    nb_el = 4
     # optim = True
     optim = False
 
@@ -82,7 +84,7 @@ def main():
     scale_val = 1.0
 
     # cauchy_b = False
-    # scale_val = 10
+    # scale_val = 20
 
     nb_steps = 100000
 
@@ -111,7 +113,7 @@ def main():
 
         for i in range(nb_el):
             pred_prob = exp(histo[i, :])/sum(exp(histo[i, :]))
-            print(pearsonr(pred_prob, true_prob))
+            # print(pearsonr(pred_prob, true_prob))
             dens_f[i].plot(x_dist, pred_prob)
             dens_f[i].set_ylabel("density")
             dens_f[i].set_xlim([-20, 20])
@@ -122,10 +124,6 @@ def main():
         dens_f[-1].set_xlim([-20, 20])
         dens_f[-1].set_xlabel("Sample value")
         dens_f[-1].set_ylabel("density")
-
-        # hist_f = fig.add_subplot(142)
-        # hist_f.hist(traj, bins=100)
-        # # plt.savefig("cauchy.png")
 
         plt.show()
 

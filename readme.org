@@ -15,14 +15,15 @@ from matplotlib import pyplot as plt
 from scipy.stats import pearsonr, cauchy
 from levy_mcmc import mcmc, prob_func
 
-nb_el = 4
-scale_val = 10.0
+nb_el = 5
+scale_val = 10
 nb_steps = 100000
 
 cauchy_gen = cauchy(scale=scale_val)
 cauchy_step = lambda size: cauchy_gen.rvs(size=size)
 
 normal_step = lambda size: normal(size=size, scale=scale_val)
+
 traj, histo, x_dist = mcmc(nb_steps, nb_el, normal_step)
 
 fig = plt.figure(1)
@@ -30,10 +31,11 @@ fig.suptitle(f"Normal(0, {scale_val:})")
 dens_f = [fig.add_subplot(int((nb_el+1) * 100 + 11 + i)) for i in range(nb_el+1)]
 true_prob = array([prob_func(el) for el in x_dist])
 true_prob /= sum(true_prob)
-
+ 
 for i in range(nb_el):
     pred_prob = exp(histo[i, :])/sum(exp(histo[i, :]))
-    print(pearsonr(pred_prob, true_prob))
+    # pred_prob = histo[i, :]
+    print(pearsonr(pred_prob, true_prob)[0])
     dens_f[i].plot(x_dist, pred_prob)
     dens_f[i].set_ylabel("density")
     dens_f[i].set_xlim([-20, 20])
@@ -49,7 +51,15 @@ plt.show()
 #+end_src
 
 #+RESULTS:
-: (0.3939347174680943, 2.6679952300703867e-16)
-: (0.4932597703697305, 6.464951163554549e-26)
-: (0.45731389236988634, 4.568333806105891e-22)
-: (0.38931729451602903, 6.314487608138972e-16)
+
+: 0.6766532842704203
+: 0.6327649558221327
+: 0.6872312128190627
+: 0.018954535906721155
+: 0.654157795007583
+
+: 0.870306254500428
+: 0.9516775186539508
+: 0.9114099650148781
+: 0.9804212487831754
+: 0.907973042134864
