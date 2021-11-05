@@ -1,4 +1,4 @@
-from numpy.random import normal, standard_cauchy, uniform
+from numpy.random import normal, uniform
 from numpy import exp, array, linspace, zeros, arange, mean, argmin
 from scipy.stats import pearsonr, cauchy
 from multiprocessing import Pool

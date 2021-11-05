@@ -10,19 +10,23 @@ python levy_mcmc.py
 calling the functions:
 #+begin_src python :results output
 from numpy import exp, array
+from numpy.random import normal
 from matplotlib import pyplot as plt
 from scipy.stats import pearsonr, cauchy
 from levy_mcmc import mcmc, prob_func
 
 nb_el = 4
-scale_val = 1.0
+scale_val = 10.0
 nb_steps = 100000
 
 cauchy_gen = cauchy(scale=scale_val)
 cauchy_step = lambda size: cauchy_gen.rvs(size=size)
-traj, histo, x_dist = mcmc(nb_steps, nb_el, cauchy_step)
+
+normal_step = lambda size: normal(size=size, scale=scale_val)
+traj, histo, x_dist = mcmc(nb_steps, nb_el, normal_step)
 
 fig = plt.figure(1)
+fig.suptitle(f"Normal(0, {scale_val:})")
 dens_f = [fig.add_subplot(int((nb_el+1) * 100 + 11 + i)) for i in range(nb_el+1)]
 true_prob = array([prob_func(el) for el in x_dist])
 true_prob /= sum(true_prob)
@@ -40,11 +44,12 @@ dens_f[-1].plot(x_dist, true_prob)
 dens_f[-1].set_xlim([-20, 20])
 dens_f[-1].set_xlabel("Sample value")
 dens_f[-1].set_ylabel("density")
+plt.savefig("gaussian_moves.png", dpi=300)
 plt.show()
 #+end_src
 
 #+RESULTS:
-: (0.8920654688315222, 2.292282124354227e-139)
-: (0.923118173691076, 2.7063456074570598e-167)
-: (0.9067938761656608, 2.207363017592362e-151)
-: (0.9160173533195017, 5.634094478258367e-160)
+: (0.3939347174680943, 2.6679952300703867e-16)
+: (0.4932597703697305, 6.464951163554549e-26)
+: (0.45731389236988634, 4.568333806105891e-22)
+: (0.38931729451602903, 6.314487608138972e-16)
